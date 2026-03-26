@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learning Solutions Hub | AFNI</title>
+  <script>
+    (function () {
+      // Break out of SharePoint's document preview iframe
+      if (window.self !== window.top) {
+        window.top.location.href = window.location.href;
+        return;
+      }
+      // Strip SharePoint viewer query parameters (?action=, ?sourcedoc=, ?web=)
+      // so the page loads as a clean standalone file without the preview toolbar
+      if (/[?&](action|sourcedoc|web)=/.test(window.location.search)) {
+        window.location.replace(window.location.pathname);
+      }
+    }());
+  </script>
+  <style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap');
+
+/* ── Reset & Base ──────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background-color: #f8fafc; color: #1e293b; display: flex; }
+h1, h2, h3, h4, h5, h6 { font-family: 'Sora', sans-serif; }
+a { text-decoration: none; color: inherit; }
+ul { list-style: none; }
+
+/* ── Sidebar ───────────────────────────────────────────────── */
+.sidebar { position: fixed; top: 0; left: 0; height: 100vh; width: 260px; background: linear-gradient(135deg, #0D1B2A 0%, #1A2E47 50%, #0D1B2A 100%); color: #fff; display: flex; flex-direction: column; z-index: 100; transition: transform 0.3s ease; overflow: hidden; }
+.sidebar-logo { display: flex; align-items: center; gap: 12px; padding: 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
+.logo-company { display: block; font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 800; color: #fff; letter-spacing: 0.04em; line-height: 1; }
+.logo-sub { display: block; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 500; color: #00C49A; margin-top: 3px; letter-spacing: 0.01em; }
+.sidebar-nav { flex: 1; overflow-y: auto; padding: 12px 8px; scrollbar-width: none; }
+.sidebar-nav::-webkit-scrollbar { display: none; }
+.sidebar-nav ul { display: flex; flex-direction: column; gap: 2px; }
+.sidebar-nav a { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 13.5px; font-weight: 500; color: rgba(255,255,255,0.6); transition: background 0.15s, color 0.15s; }
+.sidebar-nav a:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.sidebar-nav a.active { background: rgba(0,196,154,0.18); color: #00C49A; }
+
+/* ── Main Wrapper ──────────────────────────────────────────── */
+.main-wrapper { margin-left: 260px; flex: 1; min-width: 0; display: flex; flex-direction: column; transition: margin-left 0.3s ease; }
+
+/* ── Top Header ────────────────────────────────────────────── */
+.top-header { position: sticky; top: 0; z-index: 50; background: rgba(248,250,252,0.9); backdrop-filter: blur(8px); border-bottom: 1px solid #e2e8f0; padding: 12px 24px; display: flex; align-items: center; gap: 12px; }
+.mobile-menu-btn { display: none; background: #0D1B2A; color: #fff; border: none; border-radius: 8px; width: 38px; height: 38px; font-size: 18px; cursor: pointer; align-items: center; justify-content: center; }
+.header-title { font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 600; color: #0D1B2A; }
+
+/* ── Content ───────────────────────────────────────────────── */
+.content { padding: 32px 24px; max-width: 1100px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 64px; }
+
+/* ── Hero ──────────────────────────────────────────────────── */
+.hero { background: linear-gradient(135deg, #0D1B2A 0%, #1A2E47 50%, #0D1B2A 100%); color: #fff; border-radius: 20px; padding: 48px 40px; position: relative; overflow: hidden; }
+.hero::before { content: ''; position: absolute; top: -60px; right: -60px; width: 260px; height: 260px; border-radius: 50%; background: rgba(0,196,154,0.08); filter: blur(40px); pointer-events: none; }
+.hero h1 { font-size: clamp(1.6rem, 4vw, 2.2rem); font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+.hero p { color: rgba(255,255,255,0.7); font-size: 15px; max-width: 540px; line-height: 1.6; margin-bottom: 24px; }
+
+/* ── KPI Strip ─────────────────────────────────────────────── */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-top: 20px; }
+.kpi-card { background: #fff; border: 1px solid #e8edf2; border-radius: 12px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.kpi-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,196,154,0.1), 0 2px 8px rgba(0,0,0,0.06); }
+.kpi-card .kpi-label { font-size: 11px; font-weight: 500; color: #94a3b8; margin-bottom: 4px; }
+.kpi-card .kpi-value { font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700; color: #0D1B2A; }
+.kpi-card .kpi-trend { font-size: 11px; font-weight: 500; margin-top: 6px; color: #10b981; }
+.kpi-card .kpi-trend.down { color: #f59e0b; }
+
+/* ── Section Header ────────────────────────────────────────── */
+.section-header { margin-bottom: 20px; }
+.section-header h2 { font-size: 18px; font-weight: 700; color: #0D1B2A; }
+.section-header p { font-size: 13px; color: #94a3b8; margin-top: 4px; }
+
+/* ── Department Cards Grid ─────────────────────────────────── */
+.dept-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.dept-card { background: #fff; border: 1px solid #e8edf2; border-radius: 16px; overflow: hidden; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+.dept-card:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,196,154,0.12), 0 2px 8px rgba(0,0,0,0.08); }
+.dept-card-accent { height: 4px; width: 100%; }
+.dept-card-body { padding: 18px; }
+.dept-card-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+.dept-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.dept-card-title { font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600; color: #0D1B2A; line-height: 1.3; }
+.dept-card-tagline { font-size: 11px; color: #00C49A; font-weight: 500; margin-top: 2px; }
+.dept-card-desc { font-size: 12px; color: #94a3b8; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 14px; }
+.dept-card-footer { display: flex; align-items: center; justify-content: space-between; font-size: 11px; }
+.dept-card-footer .resource-count { color: #cbd5e1; }
+.dept-card-footer .view-link { font-weight: 600; color: #0D1B2A; font-size: 12px; transition: color 0.15s; }
+.dept-card:hover .view-link { color: #00C49A; }
+
+/* ── Department Detail Section ─────────────────────────────── */
+.dept-section { padding-top: 8px; }
+.dept-hero { border-radius: 16px; padding: 24px; color: #fff; margin-bottom: 20px; position: relative; overflow: hidden; }
+.dept-hero-inner { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; }
+.dept-hero-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.dept-hero h2 { font-size: 18px; font-weight: 700; }
+.dept-hero .dept-hero-tagline { font-size: 13px; color: rgba(255,255,255,0.75); margin-top: 2px; }
+.dept-hero-desc { font-size: 13px; color: rgba(255,255,255,0.82); line-height: 1.6; max-width: 680px; }
+
+/* ── Link Cards ────────────────────────────────────────────── */
+.links-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.link-card { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid #e8edf2; border-radius: 12px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: box-shadow 0.2s, border-color 0.2s; cursor: pointer; }
+.link-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); border-color: rgba(0,196,154,0.3); }
+.link-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; opacity: 0.12; }
+.link-label { flex: 1; font-size: 13px; font-weight: 500; color: #0D1B2A; transition: color 0.15s; line-height: 1.3; }
+.link-card:hover .link-label { color: #00C49A; }
+.link-text { flex: 1; min-width: 0; }
+.link-dept { display: block; font-size: 10px; color: #94a3b8; margin-top: 1px; }
+.link-chevron { color: #cbd5e1; font-size: 14px; flex-shrink: 0; transition: color 0.15s, transform 0.15s; }
+.link-card:hover .link-chevron { color: #00C49A; transform: translateX(2px); }
+
+/* ── Quick Links Search ────────────────────────────────────── */
+.search-wrap { position: relative; margin-bottom: 16px; }
+.search-wrap svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #94a3b8; }
+.search-wrap input { width: 100%; padding: 10px 16px 10px 38px; border: 1px solid #e2e8f0; border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 13px; background: #fff; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+.search-wrap input:focus { border-color: #00C49A; box-shadow: 0 0 0 3px rgba(0,196,154,0.15); }
+
+/* ── Announcements ─────────────────────────────────────────── */
+.announcements-list { display: flex; flex-direction: column; gap: 12px; }
+.announcement-card { background: #fff; border: 1px solid #e8edf2; border-radius: 12px; padding: 16px; display: flex; align-items: flex-start; gap: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: box-shadow 0.2s; }
+.announcement-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+.announcement-card.pinned { border-color: rgba(0,196,154,0.35); }
+.ann-icon { width: 32px; height: 32px; border-radius: 8px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+.announcement-card.pinned .ann-icon { background: rgba(0,196,154,0.1); }
+.ann-body { flex: 1; min-width: 0; }
+.ann-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 4px; }
+.ann-title { font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600; color: #0D1B2A; }
+.badge { display: inline-block; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 999px; background: #f1f5f9; color: #64748b; }
+.badge-teal { background: rgba(0,196,154,0.1); color: #00C49A; }
+.ann-text { font-size: 12px; color: #94a3b8; line-height: 1.5; }
+.ann-date { font-size: 10px; color: #cbd5e1; margin-top: 6px; }
+
+/* ── Footer ────────────────────────────────────────────────── */
+footer { border-top: 1px solid #e2e8f0; padding: 32px 0 48px; text-align: center; }
+footer p { font-size: 11px; color: #94a3b8; }
+footer p + p { margin-top: 4px; color: #cbd5e1; }
+
+/* ── Training Calendar ─────────────────────────────────────── */
+.cal-card { background: #fff; border: 1px solid #e8edf2; border-radius: 16px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+.cal-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+.cal-nav { display: flex; align-items: center; gap: 10px; }
+.cal-month-title { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; color: #0D1B2A; min-width: 160px; text-align: center; }
+.cal-nav-btn { width: 32px; height: 32px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #0D1B2A; font-size: 20px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s, border-color 0.15s; }
+.cal-nav-btn:hover { background: #f1f5f9; border-color: #00C49A; color: #00C49A; }
+.cal-today-btn { padding: 6px 14px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; color: #0D1B2A; cursor: pointer; transition: background 0.15s, border-color 0.15s, color 0.15s; }
+.cal-today-btn:hover { background: #00C49A; border-color: #00C49A; color: #fff; }
+.cal-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid #f1f5f9; }
+.cal-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; color: #64748b; }
+.cal-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.cal-dot.nlo         { background: #3b82f6; }
+.cal-dot.sco         { background: #10b981; }
+.cal-dot.foundations { background: #8b5cf6; }
+.cal-dot.bbll        { background: #f97316; }
+.cal-dot.mgr         { background: #00C49A; }
+.cal-grid-wrap { overflow-x: auto; }
+.cal-day-headers { display: grid; grid-template-columns: repeat(7, 1fr); min-width: 420px; }
+.cal-day-headers span { text-align: center; font-size: 11px; font-weight: 600; color: #94a3b8; padding: 6px 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid #f1f5f9; border-left: 1px solid #f1f5f9; min-width: 420px; }
+.cal-cell { border-right: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; min-height: 90px; padding: 6px; position: relative; vertical-align: top; }
+.cal-cell.other-month { background: #fafbfc; }
+.cal-cell.other-month .cal-date { color: #d1d5db; }
+.cal-cell.today .cal-date { background: #0D1B2A; color: #fff; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
+.cal-date { font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
+.cal-events { display: flex; flex-direction: column; gap: 2px; }
+.cal-event { font-size: 10px; font-weight: 600; color: #fff; padding: 2px 5px; border-radius: 3px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: opacity 0.15s, transform 0.15s; line-height: 1.4; }
+.cal-event:hover { opacity: 0.85; transform: scale(1.02); }
+.cal-event.nlo         { background: #3b82f6; }
+.cal-event.sco         { background: #10b981; }
+.cal-event.foundations { background: #8b5cf6; }
+.cal-event.bbll        { background: #f97316; }
+.cal-event.mgr         { background: #00C49A; color: #0D1B2A; }
+.cal-popup { position: fixed; z-index: 200; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px 18px; width: 240px; box-shadow: 0 12px 40px rgba(0,0,0,0.14); pointer-events: all; }
+.cal-popup-close { position: absolute; top: 8px; right: 10px; background: none; border: none; font-size: 18px; color: #94a3b8; cursor: pointer; line-height: 1; padding: 2px 4px; }
+.cal-popup-close:hover { color: #0D1B2A; }
+.cal-popup-type { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.cal-popup-type.nlo         { color: #3b82f6; }
+.cal-popup-type.sco         { color: #10b981; }
+.cal-popup-type.foundations { color: #8b5cf6; }
+.cal-popup-type.bbll        { color: #f97316; }
+.cal-popup-type.mgr         { color: #00C49A; }
+.cal-popup-title { font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 700; color: #0D1B2A; margin-bottom: 10px; line-height: 1.3; padding-right: 16px; }
+.cal-popup-details { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+.cal-popup-details li { font-size: 12px; color: #475569; display: flex; gap: 6px; }
+.cal-popup-details li span:first-child { color: #94a3b8; font-weight: 600; font-size: 10px; text-transform: uppercase; width: 44px; flex-shrink: 0; padding-top: 1px; }
+
+/* ── Gradient helpers ──────────────────────────────────────── */
+.grad-blue    { background: linear-gradient(135deg, #2563eb, #1e40af); }
+.grad-emerald { background: linear-gradient(135deg, #059669, #065f46); }
+.grad-violet  { background: linear-gradient(135deg, #7c3aed, #5b21b6); }
+.grad-orange  { background: linear-gradient(135deg, #f97316, #c2410c); }
+.grad-pink    { background: linear-gradient(135deg, #db2777, #9d174d); }
+.grad-cyan    { background: linear-gradient(135deg, #0891b2, #164e63); }
+
+/* ── Animation ─────────────────────────────────────────────── */
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+/* ── Sidebar collapse button ───────────────────────────────── */
+.sidebar-collapse-btn { display: none; margin: 8px auto 12px; width: 32px; height: 32px; border-radius: 8px; border: none; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); font-size: 20px; line-height: 1; cursor: pointer; transition: background 0.15s, color 0.15s; }
+.sidebar-collapse-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
+.sidebar.collapsed { width: 64px; }
+.sidebar.collapsed .logo-sub,
+.sidebar.collapsed .sidebar-nav a span { display: none; }
+.sidebar.collapsed .logo-company { font-size: 13px; }
+.sidebar.collapsed .sidebar-logo { justify-content: center; padding: 20px 0; }
+.sidebar.collapsed .sidebar-nav a { justify-content: center; padding: 10px 0; }
+.main-wrapper.sidebar-collapsed { margin-left: 64px; }
+
+/* ── Mobile overlay ────────────────────────────────────────── */
+.sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 99; }
+.sidebar-overlay.active { display: block; }
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main-wrapper { margin-left: 0; }
+  .mobile-menu-btn { display: flex; }
+}
+@media (min-width: 1025px) {
+  .sidebar-collapse-btn { display: flex; align-items: center; justify-content: center; }
+}
+@media (max-width: 640px) {
+  .content { padding: 20px 16px; gap: 48px; }
+  .hero { padding: 32px 24px; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">
+        <strong class="logo-company">AFNI</strong>
+        <small class="logo-sub">Learning Solutions Hub</small>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#analytics">Learning Analytics</a></li>
+        <li><a href="#delivery">Learning Delivery</a></li>
+        <li><a href="#lod">L&amp;OD</a></li>
+        <li><a href="#talent">Talent &amp; Development</a></li>
+        <li><a href="#experience">Learning Experience</a></li>
+        <li><a href="#technology">Learning Technology</a></li>
+        <li><a href="#calendar">Training Calendar</a></li>
+        <li><a href="#quicklinks">Quick Links</a></li>
+        <li><a href="#announcements">Announcements</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Main wrapper -->
+  <div class="main-wrapper">
+
+    <!-- Top header -->
+    <header class="top-header">
+      <button class="mobile-menu-btn" aria-label="Open menu">&#9776;</button>
+      <span class="header-title">Learning Solutions Hub</span>
+    </header>
+
+    <!-- Page content -->
+    <main class="content">
+
+      <!-- Hero -->
+      <section id="home" class="hero">
+        <h1>Welcome to the Learning Solutions Hub</h1>
+        <p>Your centralized home for training resources, analytics dashboards, and learning tools across all departments and geographies.</p>
+      </section>
+
+      <!-- KPI Strip -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <p class="kpi-label">Active Classes</p>
+          <p class="kpi-value">24</p>
+          <p class="kpi-trend">+3 this week</p>
+        </div>
+        <div class="kpi-card">
+          <p class="kpi-label">Completion Rate MTD</p>
+          <p class="kpi-value">87%</p>
+          <p class="kpi-trend">+4% vs last month</p>
+        </div>
+        <div class="kpi-card">
+          <p class="kpi-label">Training Hours Delivered</p>
+          <p class="kpi-value">1,240</p>
+          <p class="kpi-trend">Hrs this month</p>
+        </div>
+        <div class="kpi-card">
+          <p class="kpi-label">Open IDD Requests</p>
+          <p class="kpi-value">11</p>
+          <p class="kpi-trend down">3 due this week</p>
+        </div>
+        <div class="kpi-card">
+          <p class="kpi-label">Active Learners</p>
+          <p class="kpi-value">392</p>
+          <p class="kpi-trend">+18 vs last week</p>
+        </div>
+      </div>
+
+      <!-- Training Calendar -->
+      <section id="calendar">
+        <div class="section-header">
+          <h2>Training Calendar</h2>
+          <p>Centralized view of L&amp;OD training events across all programs and sites</p>
+        </div>
+        <div class="cal-card">
+          <div class="cal-toolbar">
+            <div class="cal-nav">
+              <button class="cal-nav-btn" id="cal-prev" aria-label="Previous month">&#8249;</button>
+              <h3 class="cal-month-title" id="cal-title"></h3>
+              <button class="cal-nav-btn" id="cal-next" aria-label="Next month">&#8250;</button>
+            </div>
+            <button class="cal-today-btn" id="cal-today">Today</button>
+          </div>
+          <div class="cal-legend">
+            <span class="cal-legend-item"><span class="cal-dot nlo"></span>NLO</span>
+            <span class="cal-legend-item"><span class="cal-dot sco"></span>SCO</span>
+            <span class="cal-legend-item"><span class="cal-dot foundations"></span>Foundations</span>
+            <span class="cal-legend-item"><span class="cal-dot bbll"></span>BB&amp;LL</span>
+            <span class="cal-legend-item"><span class="cal-dot mgr"></span>Manager Foundations</span>
+          </div>
+          <div class="cal-grid-wrap">
+            <div class="cal-day-headers">
+              <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+            </div>
+            <div class="cal-grid" id="cal-grid"></div>
+          </div>
+        </div>
+        <div class="cal-popup" id="cal-popup" hidden>
+          <button class="cal-popup-close" id="cal-popup-close" aria-label="Close">&times;</button>
+          <p class="cal-popup-type" id="cal-popup-type"></p>
+          <h4 class="cal-popup-title" id="cal-popup-title"></h4>
+          <ul class="cal-popup-details" id="cal-popup-details"></ul>
+        </div>
+      </section>
+
+      <!-- Departments Grid -->
+      <section id="departments">
+        <div class="section-header">
+          <h2>Departments</h2>
+          <p>Access tools and dashboards for each L&amp;OD team</p>
+        </div>
+        <div class="dept-grid">
+          <div class="dept-card" onclick="location.href='#analytics'">
+            <div class="dept-card-accent grad-blue"></div>
+            <div class="dept-card-body">
+              <div class="dept-card-header"><div class="dept-icon grad-blue"></div><div><p class="dept-card-title">Learning Analytics</p><p class="dept-card-tagline">Data-Driven Training Oversight</p></div></div>
+              <p class="dept-card-desc">Manage end-to-end coordination of training programs. Access live Power BI dashboards, daily reports, and Tableau attrition data.</p>
+              <div class="dept-card-footer"><span class="resource-count">5 resources</span><span class="view-link">View &rsaquo;</span></div>
+            </div>
+          </div>
+          <div class="dept-card" onclick="location.href='#delivery'">
+            <div class="dept-card-accent grad-emerald"></div>
+            <div class="dept-card-body">
+              <div class="dept-card-header"><div class="dept-icon grad-emerald"></div><div><p class="dept-card-title">Learning Delivery</p><p class="dept-card-tagline">From Classroom to Completion</p></div></div>
+              <p class="dept-card-desc">Facilitate and execute training programs for new and existing employees. Access attrition reports and daily delivery data.</p>
+              <div class="dept-card-footer"><span class="resource-count">5 resources</span><span class="view-link">View &rsaquo;</span></div>
+            </div>
+          </div>
+          <div class="dept-card" onclick="location.href='#lod'">
+            <div class="dept-card-accent grad-violet"></div>
+            <div class="dept-card-body">
+              <div class="dept-card-header"><div class="dept-icon grad-violet"></div><div><p class="dept-card-title">L&amp;OD</p><p class="dept-card-tagline">Building Stronger Leaders at Every Level</p></div></div>
+              <p class="dept-card-desc">Drive leadership capability and organizational effectiveness. Access Manager Foundations dashboards and Triad documentation.</p>
+              <div class="dept-card-footer"><span class="resource-count">2 resources</span><span class="view-link">View &rsaquo;</span></div>
+            </div>
+          </div>
+          <div class="dept-card" onclick="location.href='#talent'">
+            <div class="dept-card-accent grad-orange"></div>
+            <div class="dept-card-body">
+              <div class="dept-card-header"><div class="dept-icon grad-orange"></div><div><p class="dept-card-title">Talent &amp; Development</p><p class="dept-card-tagline">Growing People. Growing the Business.</p></div></div>
+              <p class="dept-card-desc">Identify, nurture, and advance employee potential at a global scale. Track participation and progress via the Global Talent Dev dashboard.</p>
+              <div class="dept-card-footer"><span class="resource-count">1 resource</span><span class="view-link">View &rsaquo;</span></div>
+            </div>
+          </div>
+          <div class="dept-card" onclick="location.href='#experience'">
+            <div class="dept-card-accent grad-pink"></div>
+            <div class="dept-card-body">
+              <div class="dept-card-header"><div class="dept-icon grad-pink"></div><div><p class="dept-card-title">Learning Experience</p><p class="dept-card-tagline">Designing Learning That Sticks</p></div></div>
+              <p class="dept-card-desc">Design, develop, and quality-assure all learning content at AFNI. Submit requests through the Learning Solutions Request Portal.</p>
+              <div class="dept-card-footer"><span class="resource-count">1 resource</span><span class="view-link">View &rsaquo;</span></div>
+            </div>
+          </div>
+          <div class="dept-card" onclick="location.href='#technology'">
+            <div class="dept-card-accent grad-cyan"></div>
+            <div class="dept-card-body">
+              <div class="dept-card-header"><div class="dept-icon grad-cyan"></div><div><p class="dept-card-title">Learning Technology</p><p class="dept-card-tagline">The Platform Powering Your Learning</p></div></div>
+              <p class="dept-card-desc">Manage AFNI's learning management systems and digital infrastructure. Administer ATLAS, oversee course publishing, and manage enrollment.</p>
+              <div class="dept-card-footer"><span class="resource-count">1 resource</span><span class="view-link">View &rsaquo;</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Learning Analytics -->
+      <section id="analytics" class="dept-section">
+        <div class="dept-hero grad-blue">
+          <div class="dept-hero-inner"><div class="dept-hero-icon"></div><div><h2>Learning Analytics</h2><p class="dept-hero-tagline">Data-Driven Training Oversight</p></div></div>
+          <p class="dept-hero-desc">Manage end-to-end coordination of training programs across all sites. Access training calendars, live Power BI dashboards, daily reports, and Tableau attrition data.</p>
+        </div>
+        <div class="links-grid">
+          <a class="link-card" href="https://app.powerbi.com/groups/me/apps/7074ad35-616c-4000-aa32-c6b35c19b495/reports/66c1d743-9249-4f15-8ec3-770d97f19d16/c215134ac64c535a51b5?experience=power-bi" target="_blank" rel="noopener noreferrer"><div class="link-icon grad-blue"></div><span class="link-label">Power BI – GLE (PH Attrition)</span><span class="link-chevron">›</span></a>
+          <a class="link-card" href="https://app.powerbi.com/groups/me/apps/0ecab4fc-82e9-4c70-9306-a4190be38c17/reports/e2ab2401-e5f8-4b7d-a8dd-9be92d30b564/70727af30e9ec6a598bd?ctid=d80d1b57-a9af-40a9-a35b-060795e6ce43&experience=power-bi" target="_blank" rel="noopener noreferrer"><div class="link-icon grad-blue"></div><span class="link-label">Power BI – CE Ops (PSO)</span><span class="link-chevron">›</span></a>
+          <a class="link-card" href="https://app.powerbi.com/groups/me/apps/794c4136-cd21-491c-a9c4-48ccf4fc1149/reports/a12d0a8f-34e5-450a-b537-823489edefad/d33d84c87da10b3808ec?ctid=d80d1b57-a9af-40a9-a35b-060795e6ce43&experience=power-bi" target="_blank" rel="noopener noreferrer"><div class="link-icon grad-blue"></div><span class="link-label">Power BI – CE Ops (Non-PSO)</span><span class="link-chevron">›</span></a>
+          <a class="link-card" href="https://afni4.sharepoint.com/sites/globaltraining/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2Fglobaltraining%2FShared%20Documents%2FDaily%20Training%20Reports&viewid=843541bf%2Def96%2D46cd%2Db631%2Defbbe1e2ad53" target="_blank" rel="noopener noreferrer"><div class="link-icon grad-blue"></div><span class="link-label">Daily Training Reports</span><span class="link-chevron">›</span></a>
+          <a class="link-card" href="https://tableau.afni.net/#/views/AttritionReport/TRAININGMTDATTRITION?:iid=1" target="_blank" rel="noopener noreferrer"><div class="link-icon grad-blue"></div><span class="link-label">Tableau – Training Attrition</span><span class="link-chevron">›</span></a>
+        </div>
+      </section>
+
+      <!-- Learning Delivery -->
+      <section id="delivery" class="dept-section">
+        <div class="dept-hero grad-emerald">
+          <div class="dept-hero-inner"><div class="dept-hero-icon"></div><div><h2>Learning Delivery</h2><p class="dept-hero-tagline">From Classroom to Completion</p></div></div>
+          <p class="dept-hero-desc">Facilitate and execute training programs for new and existing employees. Access attrition reports, supplemental course dashboards, and daily delivery reports.</p>
+        </div>
+        <div class="links-grid">
+          <a class="link-card" href="https://app.powerbi.com/groups/me/apps/7074ad35-616c-4000-aa32-c6b35c19b495/reports/66c1d743-9249-4f15-8ec3-770d97f19d16/c215134ac64c535a51b5?experience=power-bi" target="_blank" rel="noopener noreferrer"><div class="link-icon grad-emerald"></div><span class="link-label">Power BI – GLE (PH Attrition)</span><span class="link-chevron">›</span></a>
+          <a class="link-card" href="https://app.powerbi.com/groups/me/apps/0ecab4fc-82e9-4c70-9306-a4190be38c17/reports/e2ab2401-e5f8-4b7d-a8dd-9be92d30b564/70727af30e9ec6a598bd?ctid=d80d1b57-a9af-40a9-a35b-060795e6ce43&experience=power-bi" target="_blank" rel="noopener noreferrer"><div class="link-icon grad-emerald"></div><span class="link-label">Power BI – CE PSO</span><span class="link-chevron">›</span></a>
+          <a class="link-card" href="https://app.powerbi.com/groups/me/apps/794c4136-cd21-491c-a9c4-48ccf4fc1149/reports/a12d0a8f-34e5-450a-b537-823489edefad/d33d84c87da10b3808ec?ctid=d80d1b57-a9af-40a9-a35b-060795e6ce43&experience=power-bi" target="_blank" rel="noopener noreferrer"><div class="link-icon grad-emerald"></div><span class="link-label">Power BI – CE Non-PSO</span><span class="link-chevron">›</span></a>
+          <a class="link-card" href="https://afni4.sharepoint.com/sites/globaltraining/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2Fglobaltraining%2FShared%20Documents%2FDaily%20Training%20Reports&viewid=843541bf%2Def96%2D46cd%2Db631%2Defbbe1e2ad53" target="_blank" rel="noopener noreferrer"><div class="link-icon grad-emerald"></div><span class="link-label">Daily Training Reports</span><span class="link-chevron">›</span></a>
+          <a class="link-card" href="https://tableau.afni.net/#/views/AttritionReport/TRAININGMTDATTRITION?:iid=1" target="_blank" rel="noopener noreferrer"><div class="link-icon grad-emerald"></div><span class="link-label">Tableau – Training Attrition</span><span class="link-chevron">›</span></a>
+        </div>
+      </section>
+
+      <!-- L&OD -->
+      <section id="lod" class="dept-section">
+        <div class="dept-hero grad-violet">
+          <div class="dept-hero-inner"><div class="dept-hero-icon"></div><div><h2>L&amp;OD</h2><p class="dept-hero-tagline">Building Stronger Leaders at Every Level</p></div></div>
+          <p class="dept-hero-desc">Drive leadership capability and organizational effectiveness. Access the Manager Foundations dashboard, coaching audit data, and Triad documentation.</p>
+        </div>
+        <div class="links-grid">
+          <a class="link-card" href="https://app.powerbi.com/groups/me/apps/3ed9f3ec-b44f-48e9-9c50-24dff367fa36/reports/468a74f4-ac0b-4844-8421-e3d50c46f73e/d198350020e589573b30?ctid=d80d1b57-a9af-40a9-a35b-060795e6ce43&experience=power-bi" target="_blank" rel="noopener noreferrer"><div class="link-icon grad-violet"></div><span class="link-label">Power BI – Manager Foundations</span><span class="link-chevron">›</span></a>
+          <a class="link-card" href="https://afni4.sharepoint.com/:f:/r/teams/SLSApps/Shared%20Documents/2026%20%20Learning%20Reports/AAA.L%26OD/Audit%20and%20Triad%20List?csf=1&web=1&e=Pw6xpI" target="_blank" rel="noopener noreferrer"><div class="link-icon grad-violet"></div><span class="link-label">Doc Audit &amp; Triad List</span><span class="link-chevron">›</span></a>
+        </div>
+      </section>
+
+      <!-- Talent & Development -->
+      <section id="talent" class="dept-section">
+        <div class="dept-hero grad-orange">
+          <div class="dept-hero-inner"><div class="dept-hero-icon"></div><div><h2>Talent &amp; Development</h2><p class="dept-hero-tagline">Growing People. Growing the Business.</p></div></div>
+          <p class="dept-hero-desc">Identify, nurture, and advance employee potential at a global scale. Access the Global Talent Development Training Dashboard to track participation and progress.</p>
+        </div>
+        <div class="links-grid">
+          <a class="link-card" href="https://app.powerbi.com/groups/me/apps/505dfe57-1cfa-40d1-b2ba-96b59719b2e0/reports/7df6c4f3-d9f2-4990-8084-8e0029e9eb0d/2b19133ee5498563e93a?ctid=d80d1b57-a9af-40a9-a35b-060795e6ce43&experience=power-bi" target="_blank" rel="noopener noreferrer"><div class="link-icon grad-orange"></div><span class="link-label">Power BI – Global Talent Dev</span><span class="link-chevron">›</span></a>
+        </div>
+      </section>
+
+      <!-- Learning Experience -->
+      <section id="experience" class="dept-section">
+        <div class="dept-hero grad-pink">
+          <div class="dept-hero-inner"><div class="dept-hero-icon"></div><div><h2>Learning Experience</h2><p class="dept-hero-tagline">Designing Learning That Sticks</p></div></div>
+          <p class="dept-hero-desc">Design, develop, and quality-assure all learning content at AFNI. Submit training content requests through the Learning Solutions Request Portal.</p>
+        </div>
+        <div class="links-grid">
+          <a class="link-card" href="https://help.afni.com/esc?id=sc_cat_item&table=sc_cat_item&sys_id=7038d20e972bce109f7a74f0f053af6b" target="_blank" rel="noopener noreferrer"><div class="link-icon grad-pink"></div><span class="link-label">Learning Solutions Request Portal</span><span class="link-chevron">›</span></a>
+        </div>
+      </section>
+
+      <!-- Learning Technology -->
+      <section id="technology" class="dept-section">
+        <div class="dept-hero grad-cyan">
+          <div class="dept-hero-inner"><div class="dept-hero-icon"></div><div><h2>Learning Technology</h2><p class="dept-hero-tagline">The Platform Powering Your Learning</p></div></div>
+          <p class="dept-hero-desc">Manage AFNI's learning management systems and digital learning infrastructure. Administer ATLAS, oversee course publishing, and manage learner enrollment.</p>
+        </div>
+        <div class="links-grid">
+          <a class="link-card" href="#" target="_blank" rel="noopener noreferrer"><div class="link-icon grad-cyan"></div><span class="link-label">ATLAS (LMS)</span><span class="link-chevron">›</span></a>
+        </div>
+      </section>
+
+      <!-- Quick Links -->
+      <section id="quicklinks">
+        <div class="section-header">
+          <h2>Quick Links</h2>
+          <p>All external tools at a glance</p>
+        </div>
+        <div class="search-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" id="quicklinks-search" placeholder="Search links..." autocomplete="off" />
+        </div>
+        <div class="links-grid" id="quicklinks-grid">
+          <a class="link-card" href="https://app.powerbi.com/groups/me/apps/7074ad35-616c-4000-aa32-c6b35c19b495/reports/66c1d743-9249-4f15-8ec3-770d97f19d16/c215134ac64c535a51b5?experience=power-bi" target="_blank" rel="noopener noreferrer" data-dept="Learning Analytics" data-label="Power BI – GLE (PH Attrition)"><div class="link-icon grad-blue"></div><div class="link-text"><span class="link-label">Power BI – GLE (PH Attrition)</span><span class="link-dept">Learning Analytics</span></div><span class="link-chevron">›</span></a>
+          <a class="link-card" href="https://app.powerbi.com/groups/me/apps/0ecab4fc-82e9-4c70-9306-a4190be38c17/reports/e2ab2401-e5f8-4b7d-a8dd-9be92d30b564/70727af30e9ec6a598bd?ctid=d80d1b57-a9af-40a9-a35b-060795e6ce43&experience=power-bi" target="_blank" rel="noopener noreferrer" data-dept="Learning Analytics" data-label="Power BI – CE Ops (PSO)"><div class="link-icon grad-blue"></div><div class="link-text"><span class="link-label">Power BI – CE Ops (PSO)</span><span class="link-dept">Learning Analytics</span></div><span class="link-chevron">›</span></a>
+          <a class="link-card" href="https://app.powerbi.com/groups/me/apps/794c4136-cd21-491c-a9c4-48ccf4fc1149/reports/a12d0a8f-34e5-450a-b537-823489edefad/d33d84c87da10b3808ec?ctid=d80d1b57-a9af-40a9-a35b-060795e6ce43&experience=power-bi" target="_blank" rel="noopener noreferrer" data-dept="Learning Analytics" data-label="Power BI – CE Ops (Non-PSO)"><div class="link-icon grad-blue"></div><div class="link-text"><span class="link-label">Power BI – CE Ops (Non-PSO)</span><span class="link-dept">Learning Analytics</span></div><span class="link-chevron">›</span></a>
+          <a class="link-card" href="https://afni4.sharepoint.com/sites/globaltraining/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2Fglobaltraining%2FShared%20Documents%2FDaily%20Training%20Reports&viewid=843541bf%2Def96%2D46cd%2Db631%2Defbbe1e2ad53" target="_blank" rel="noopener noreferrer" data-dept="Learning Analytics" data-label="Daily Training Reports"><div class="link-icon grad-blue"></div><div class="link-text"><span class="link-label">Daily Training Reports</span><span class="link-dept">Learning Analytics</span></div><span class="link-chevron">›</span></a>
+          <a class="link-card" href="https://tableau.afni.net/#/views/AttritionReport/TRAININGMTDATTRITION?:iid=1" target="_blank" rel="noopener noreferrer" data-dept="Learning Analytics" data-label="Tableau – Training Attrition"><div class="link-icon grad-blue"></div><div class="link-text"><span class="link-label">Tableau – Training Attrition</span><span class="link-dept">Learning Analytics</span></div><span class="link-chevron">›</span></a>
+          <a class="link-card" href="https://app.powerbi.com/groups/me/apps/7074ad35-616c-4000-aa32-c6b35c19b495/reports/66c1d743-9249-4f15-8ec3-770d97f19d16/c215134ac64c535a51b5?experience=power-bi" target="_blank" rel="noopener noreferrer" data-dept="Learning Delivery" data-label="Power BI – GLE (PH Attrition)"><div class="link-icon grad-emerald"></div><div class="link-text"><span class="link-label">Power BI – GLE (PH Attrition)</span><span class="link-dept">Learning Delivery</span></div><span class="link-chevron">›</span></a>
+          <a class="link-card" href="https://app.powerbi.com/groups/me/apps/0ecab4fc-82e9-4c70-9306-a4190be38c17/reports/e2ab2401-e5f8-4b7d-a8dd-9be92d30b564/70727af30e9ec6a598bd?ctid=d80d1b57-a9af-40a9-a35b-060795e6ce43&experience=power-bi" target="_blank" rel="noopener noreferrer" data-dept="Learning Delivery" data-label="Power BI – CE PSO"><div class="link-icon grad-emerald"></div><div class="link-text"><span class="link-label">Power BI – CE PSO</span><span class="link-dept">Learning Delivery</span></div><span class="link-chevron">›</span></a>
+          <a class="link-card" href="https://app.powerbi.com/groups/me/apps/794c4136-cd21-491c-a9c4-48ccf4fc1149/reports/a12d0a8f-34e5-450a-b537-823489edefad/d33d84c87da10b3808ec?ctid=d80d1b57-a9af-40a9-a35b-060795e6ce43&experience=power-bi" target="_blank" rel="noopener noreferrer" data-dept="Learning Delivery" data-label="Power BI – CE Non-PSO"><div class="link-icon grad-emerald"></div><div class="link-text"><span class="link-label">Power BI – CE Non-PSO</span><span class="link-dept">Learning Delivery</span></div><span class="link-chevron">›</span></a>
+          <a class="link-card" href="https://afni4.sharepoint.com/sites/globaltraining/Shared%20Documents/Forms/AllItems.aspx?id=%2Fsites%2Fglobaltraining%2FShared%20Documents%2FDaily%20Training%20Reports&viewid=843541bf%2Def96%2D46cd%2Db631%2Defbbe1e2ad53" target="_blank" rel="noopener noreferrer" data-dept="Learning Delivery" data-label="Daily Training Reports"><div class="link-icon grad-emerald"></div><div class="link-text"><span class="link-label">Daily Training Reports</span><span class="link-dept">Learning Delivery</span></div><span class="link-chevron">›</span></a>
+          <a class="link-card" href="https://tableau.afni.net/#/views/AttritionReport/TRAININGMTDATTRITION?:iid=1" target="_blank" rel="noopener noreferrer" data-dept="Learning Delivery" data-label="Tableau – Training Attrition"><div class="link-icon grad-emerald"></div><div class="link-text"><span class="link-label">Tableau – Training Attrition</span><span class="link-dept">Learning Delivery</span></div><span class="link-chevron">›</span></a>
+          <a class="link-card" href="https://app.powerbi.com/groups/me/apps/3ed9f3ec-b44f-48e9-9c50-24dff367fa36/reports/468a74f4-ac0b-4844-8421-e3d50c46f73e/d198350020e589573b30?ctid=d80d1b57-a9af-40a9-a35b-060795e6ce43&experience=power-bi" target="_blank" rel="noopener noreferrer" data-dept="L&OD" data-label="Power BI – Manager Foundations"><div class="link-icon grad-violet"></div><div class="link-text"><span class="link-label">Power BI – Manager Foundations</span><span class="link-dept">L&amp;OD</span></div><span class="link-chevron">›</span></a>
+          <a class="link-card" href="https://afni4.sharepoint.com/:f:/r/teams/SLSApps/Shared%20Documents/2026%20%20Learning%20Reports/AAA.L%26OD/Audit%20and%20Triad%20List?csf=1&web=1&e=Pw6xpI" target="_blank" rel="noopener noreferrer" data-dept="L&OD" data-label="Doc Audit & Triad List"><div class="link-icon grad-violet"></div><div class="link-text"><span class="link-label">Doc Audit &amp; Triad List</span><span class="link-dept">L&amp;OD</span></div><span class="link-chevron">›</span></a>
+          <a class="link-card" href="https://app.powerbi.com/groups/me/apps/505dfe57-1cfa-40d1-b2ba-96b59719b2e0/reports/7df6c4f3-d9f2-4990-8084-8e0029e9eb0d/2b19133ee5498563e93a?ctid=d80d1b57-a9af-40a9-a35b-060795e6ce43&experience=power-bi" target="_blank" rel="noopener noreferrer" data-dept="Talent & Development" data-label="Power BI – Global Talent Dev"><div class="link-icon grad-orange"></div><div class="link-text"><span class="link-label">Power BI – Global Talent Dev</span><span class="link-dept">Talent &amp; Development</span></div><span class="link-chevron">›</span></a>
+          <a class="link-card" href="https://help.afni.com/esc?id=sc_cat_item&table=sc_cat_item&sys_id=7038d20e972bce109f7a74f0f053af6b" target="_blank" rel="noopener noreferrer" data-dept="Learning Experience" data-label="Learning Solutions Request Portal"><div class="link-icon grad-pink"></div><div class="link-text"><span class="link-label">Learning Solutions Request Portal</span><span class="link-dept">Learning Experience</span></div><span class="link-chevron">›</span></a>
+          <a class="link-card" href="#" target="_blank" rel="noopener noreferrer" data-dept="Learning Technology" data-label="ATLAS (LMS)"><div class="link-icon grad-cyan"></div><div class="link-text"><span class="link-label">ATLAS (LMS)</span><span class="link-dept">Learning Technology</span></div><span class="link-chevron">›</span></a>
+        </div>
+        <p id="quicklinks-empty" style="display:none; text-align:center; color:#94a3b8; font-size:13px; padding:32px 0;">No links match your search.</p>
+      </section>
+
+      <!-- Announcements -->
+      <section id="announcements">
+        <div class="section-header">
+          <h2>Announcements</h2>
+          <p>Latest updates from L&amp;OD teams</p>
+        </div>
+        <div class="announcements-list">
+          <div class="announcement-card pinned">
+            <div class="ann-icon">&#9733;</div>
+            <div class="ann-body">
+              <div class="ann-meta"><span class="ann-title">Q2 NLO Schedule Published</span><span class="badge">All Sites</span><span class="badge badge-teal">Pinned</span></div>
+              <p class="ann-text">The New Learner Onboarding schedule for Q2 2026 is now live. Please review your class assignments in the Training Calendar.</p>
+              <p class="ann-date">Mar 25, 2026</p>
+            </div>
+          </div>
+          <div class="announcement-card">
+            <div class="ann-icon">&#128227;</div>
+            <div class="ann-body">
+              <div class="ann-meta"><span class="ann-title">ATLAS Maintenance Window</span><span class="badge">LMS</span></div>
+              <p class="ann-text">ATLAS will be unavailable on Saturday, March 29 from 10 PM – 2 AM CST for scheduled maintenance. Plan your course completions accordingly.</p>
+              <p class="ann-date">Mar 24, 2026</p>
+            </div>
+          </div>
+          <div class="announcement-card">
+            <div class="ann-icon">&#128227;</div>
+            <div class="ann-body">
+              <div class="ann-meta"><span class="ann-title">Manager Foundations Cohort 3 Enrollment Open</span><span class="badge">L&amp;OD</span></div>
+              <p class="ann-text">Enrollment for Manager Foundations Cohort 3 is now open. Site leaders should submit nominations by April 4.</p>
+              <p class="ann-date">Mar 22, 2026</p>
+            </div>
+          </div>
+          <div class="announcement-card">
+            <div class="ann-icon">&#128227;</div>
+            <div class="ann-body">
+              <div class="ann-meta"><span class="ann-title">New Power BI Dashboard: CE Non-PSO</span><span class="badge">Analytics</span></div>
+              <p class="ann-text">The updated CE Non-PSO supplemental tracking dashboard is live. It now includes phase-level breakdowns and LOB filters.</p>
+              <p class="ann-date">Mar 20, 2026</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer>
+        <p>Learning Solutions Hub &middot; AFNI Global Learning &amp; Organizational Development &middot; Internal Use Only</p>
+        <p>&copy; 2026 AFNI Inc. All rights reserved.</p>
+      </footer>
+
+    </main>
+  </div>
+
+  <script>
+// ── Sidebar elements ──────────────────────────────────────────
+const sidebar     = document.querySelector('.sidebar');
+const mainWrapper = document.querySelector('.main-wrapper');
+const mobileBtn   = document.querySelector('.mobile-menu-btn');
+
+// Create overlay element for mobile
+const overlay = document.createElement('div');
+overlay.className = 'sidebar-overlay';
+document.body.appendChild(overlay);
+
+// ── Sidebar collapse (desktop) ────────────────────────────────
+const collapseBtn = document.createElement('button');
+collapseBtn.className = 'sidebar-collapse-btn';
+collapseBtn.setAttribute('aria-label', 'Collapse sidebar');
+collapseBtn.innerHTML = '&#8249;';
+sidebar.appendChild(collapseBtn);
+
+let collapsed = false;
+
+collapseBtn.addEventListener('click', () => {
+  collapsed = !collapsed;
+  sidebar.classList.toggle('collapsed', collapsed);
+  mainWrapper.classList.toggle('sidebar-collapsed', collapsed);
+  collapseBtn.innerHTML = collapsed ? '&#8250;' : '&#8249;';
+  collapseBtn.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
+});
+
+// ── Mobile menu open / close ──────────────────────────────────
+function openMobileMenu() {
+  sidebar.classList.add('open');
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMobileMenu() {
+  sidebar.classList.remove('open');
+  overlay.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+mobileBtn.addEventListener('click', openMobileMenu);
+overlay.addEventListener('click', closeMobileMenu);
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeMobileMenu();
+});
+
+// ── Smooth scroll + close mobile on nav click ─────────────────
+const navLinks = document.querySelectorAll('.sidebar-nav a');
+
+navLinks.forEach(link => {
+  link.addEventListener('click', (e) => {
+    const href = link.getAttribute('href');
+    if (!href || !href.startsWith('#')) return;
+    e.preventDefault();
+    const target = document.querySelector(href);
+    if (!target) return;
+    closeMobileMenu();
+    const offset = 80;
+    const top = target.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({ top, behavior: 'smooth' });
+  });
+});
+
+// ── Active nav link on scroll ─────────────────────────────────
+const sectionIds = ['home', 'calendar', 'analytics', 'delivery', 'lod', 'talent', 'experience', 'technology', 'quicklinks', 'announcements'];
+
+function setActiveLink(id) {
+  navLinks.forEach(link => {
+    link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+  });
+}
+
+function onScroll() {
+  const scrollMid = window.scrollY + window.innerHeight * 0.35;
+  let current = sectionIds[0];
+  for (const id of sectionIds) {
+    const el = document.getElementById(id);
+    if (el && el.offsetTop <= scrollMid) current = id;
+  }
+  setActiveLink(current);
+}
+
+window.addEventListener('scroll', onScroll, { passive: true });
+onScroll();
+
+// ── Training Calendar ─────────────────────────────────────────
+(function () {
+  const TYPES = {
+    nlo:         { label: 'NLO',                 cls: 'nlo' },
+    sco:         { label: 'SCO',                 cls: 'sco' },
+    foundations: { label: 'Foundations',         cls: 'foundations' },
+    bbll:        { label: 'BB&LL',               cls: 'bbll' },
+    mgr:         { label: 'Manager Foundations', cls: 'mgr' },
+  };
+
+  function d(dayOfMonth, hour = 9) {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), dayOfMonth, hour, 0, 0);
+  }
+
+  const events = [
+    { id: 1,  type: 'nlo',         title: 'NLO \u2013 Class 12 Kickoff',          date: d(3),  time: '9:00 AM \u2013 11:00 AM',  site: 'PH',        trainer: 'Maria Santos' },
+    { id: 2,  type: 'sco',         title: 'SCO \u2013 Phase 2 Review',            date: d(5),  time: '10:00 AM \u2013 11:30 AM', site: 'US',        trainer: 'Jake Rivera' },
+    { id: 3,  type: 'mgr',         title: 'Manager Foundations Cohort 3',         date: d(7),  time: '1:00 PM \u2013 3:00 PM',   site: 'All Sites', trainer: 'Lea Cruz' },
+    { id: 4,  type: 'bbll',        title: 'BB&LL \u2013 Lunch & Learn',           date: d(10), time: '12:00 PM \u2013 1:00 PM',  site: 'MX',        trainer: 'Carlos Mendez' },
+    { id: 5,  type: 'nlo',         title: 'NLO \u2013 Class 13 Kickoff',          date: d(12), time: '9:00 AM \u2013 11:00 AM',  site: 'PH',        trainer: 'Maria Santos' },
+    { id: 6,  type: 'foundations', title: 'Foundations \u2013 Module 2',          date: d(14), time: '10:00 AM \u2013 12:00 PM', site: 'US',        trainer: 'Jake Rivera' },
+    { id: 7,  type: 'sco',         title: 'SCO \u2013 Trainer Certification',     date: d(17), time: '8:00 AM \u2013 5:00 PM',   site: 'PH',        trainer: 'Ana Reyes' },
+    { id: 8,  type: 'mgr',         title: 'Manager Foundations Cohort 3 D2',      date: d(19), time: '1:00 PM \u2013 3:00 PM',   site: 'All Sites', trainer: 'Lea Cruz' },
+    { id: 9,  type: 'foundations', title: 'Foundations \u2013 Module 3',          date: d(21), time: '10:00 AM \u2013 12:00 PM', site: 'MX',        trainer: 'Carlos Mendez' },
+    { id: 10, type: 'nlo',         title: 'NLO \u2013 Class 14 Kickoff',          date: d(24), time: '9:00 AM \u2013 11:00 AM',  site: 'MX',        trainer: 'Carlos Mendez' },
+    { id: 11, type: 'bbll',        title: 'BB&LL \u2013 Team Building Session',   date: d(26), time: '2:00 PM \u2013 3:30 PM',   site: 'US',        trainer: 'Jake Rivera' },
+    { id: 12, type: 'sco',         title: 'SCO \u2013 Q2 Calibration',            date: d(28), time: '11:00 AM \u2013 12:00 PM', site: 'PH',        trainer: 'Ana Reyes' },
+  ];
+
+  let viewYear  = new Date().getFullYear();
+  let viewMonth = new Date().getMonth();
+
+  const grid       = document.getElementById('cal-grid');
+  const titleEl    = document.getElementById('cal-title');
+  const popup      = document.getElementById('cal-popup');
+  const popupClose = document.getElementById('cal-popup-close');
+
+  if (!grid) return;
+
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const today  = new Date();
+
+  function sameDay(a, b) {
+    return a.getFullYear() === b.getFullYear() &&
+           a.getMonth()    === b.getMonth()    &&
+           a.getDate()     === b.getDate();
+  }
+
+  function render() {
+    titleEl.textContent = MONTHS[viewMonth] + ' ' + viewYear;
+    grid.innerHTML = '';
+
+    const firstDay    = new Date(viewYear, viewMonth, 1).getDay();
+    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+    const daysInPrev  = new Date(viewYear, viewMonth, 0).getDate();
+
+    for (let i = 0; i < 42; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cal-cell';
+
+      let cellDate;
+      if (i < firstDay) {
+        cellDate = new Date(viewYear, viewMonth - 1, daysInPrev - firstDay + i + 1);
+        cell.classList.add('other-month');
+      } else if (i >= firstDay + daysInMonth) {
+        cellDate = new Date(viewYear, viewMonth + 1, i - firstDay - daysInMonth + 1);
+        cell.classList.add('other-month');
+      } else {
+        cellDate = new Date(viewYear, viewMonth, i - firstDay + 1);
+        if (sameDay(cellDate, today)) cell.classList.add('today');
+      }
+
+      const dateEl = document.createElement('div');
+      dateEl.className = 'cal-date';
+      dateEl.textContent = cellDate.getDate();
+      cell.appendChild(dateEl);
+
+      const dayEvents = events.filter(e => sameDay(e.date, cellDate));
+      if (dayEvents.length) {
+        const wrap = document.createElement('div');
+        wrap.className = 'cal-events';
+        dayEvents.forEach(ev => {
+          const evEl = document.createElement('div');
+          evEl.className = 'cal-event ' + TYPES[ev.type].cls;
+          evEl.textContent = ev.title;
+          evEl.addEventListener('click', (e) => { e.stopPropagation(); showPopup(ev, evEl); });
+          wrap.appendChild(evEl);
+        });
+        cell.appendChild(wrap);
+      }
+
+      grid.appendChild(cell);
+    }
+  }
+
+  function showPopup(ev, anchor) {
+    document.getElementById('cal-popup-type').textContent  = TYPES[ev.type].label;
+    document.getElementById('cal-popup-type').className    = 'cal-popup-type ' + TYPES[ev.type].cls;
+    document.getElementById('cal-popup-title').textContent = ev.title;
+    document.getElementById('cal-popup-details').innerHTML =
+      '<li><span>Time</span><span>' + ev.time + '</span></li>' +
+      '<li><span>Site</span><span>' + ev.site + '</span></li>' +
+      '<li><span>Trainer</span><span>' + ev.trainer + '</span></li>';
+
+    popup.hidden = false;
+    const rect = anchor.getBoundingClientRect();
+    const popW = 240, popH = 160;
+    let left = rect.right + 8;
+    let top  = rect.top + window.scrollY;
+    if (left + popW > window.innerWidth - 16) left = rect.left - popW - 8;
+    if (top + popH > window.scrollY + window.innerHeight - 16) top = window.scrollY + window.innerHeight - popH - 16;
+    popup.style.left = Math.max(8, left) + 'px';
+    popup.style.top  = Math.max(8, top)  + 'px';
+  }
+
+  function closePopup() { popup.hidden = true; }
+
+  popupClose.addEventListener('click', closePopup);
+  document.addEventListener('click', (e) => { if (!popup.hidden && !popup.contains(e.target)) closePopup(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePopup(); });
+
+  document.getElementById('cal-prev').addEventListener('click', () => {
+    if (viewMonth === 0) { viewMonth = 11; viewYear--; } else viewMonth--;
+    render();
+  });
+  document.getElementById('cal-next').addEventListener('click', () => {
+    if (viewMonth === 11) { viewMonth = 0; viewYear++; } else viewMonth++;
+    render();
+  });
+  document.getElementById('cal-today').addEventListener('click', () => {
+    viewYear = new Date().getFullYear();
+    viewMonth = new Date().getMonth();
+    render();
+  });
+
+  render();
+})();
+
+// ── Quick Links search filter ─────────────────────────────────
+const searchInput = document.getElementById('quicklinks-search');
+const linkCards   = document.querySelectorAll('#quicklinks-grid .link-card');
+const emptyMsg    = document.getElementById('quicklinks-empty');
+
+if (searchInput) {
+  searchInput.addEventListener('input', () => {
+    const query = searchInput.value.trim().toLowerCase();
+    let visible = 0;
+    linkCards.forEach(card => {
+      const match = !query ||
+        (card.dataset.label || '').toLowerCase().includes(query) ||
+        (card.dataset.dept  || '').toLowerCase().includes(query);
+      card.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    emptyMsg.style.display = visible === 0 ? 'block' : 'none';
+  });
+}
+  </script>
+</body>
+</html>
